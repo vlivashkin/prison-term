@@ -1,10 +1,10 @@
 package vk.api {
   
-  import flash.net.*;
+  import com.adobe.serialization.json.JSON;
+  
   import flash.errors.*;
   import flash.events.*;
-  
-  import vk.api.serialization.json.*;
+  import flash.net.*;
   
   public class DataProvider {    
 	private var _api_sid: String;
