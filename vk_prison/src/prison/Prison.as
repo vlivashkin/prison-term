@@ -11,7 +11,6 @@ package prison
 	
 	import vk.APIConnection;
 	import vk.events.*;
-	import vk.ui.VKButton;
 
 	[SWF (width=807, height=454, backgroundColor=0xF7F7F7)]
 	public class Prison extends Sprite
