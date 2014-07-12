@@ -15,8 +15,8 @@ package vk.events {
     public static const PHOTO_CANCEL: String = "onProfilePhotoCancel";
     
     
-  	private var _data: Object = new Object();
-	private var _params: Array = new Array();
+  	private var _data: Object = {};
+	private var _params: Array = [];
     public function CustomEvent(type : String, bubbles : Boolean = false, cancelable : Boolean = false) {
       super(type, bubbles, cancelable);
     }
