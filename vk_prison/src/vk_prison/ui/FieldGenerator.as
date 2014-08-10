@@ -4,7 +4,7 @@ import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
 import flash.text.TextFormatAlign;
 
-public class Creator {
+public class FieldGenerator {
 
     [Embed(systemFont="Calibri",
             fontName="CalibriCustom",
@@ -15,7 +15,7 @@ public class Creator {
             embedAsCFF="false")]
     private var CalibriCustom:Class;
 
-    public function Creator() {
+    public function FieldGenerator() {
     }
 
     public static function createQNumField():TextField {

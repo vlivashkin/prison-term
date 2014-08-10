@@ -1,10 +1,12 @@
 package vk_prison {
 import flash.display.Sprite;
 import flash.events.*;
+
 import vk_prison.data.Question;
 import vk_prison.data.QuestionsManager;
 import vk_prison.ui.ScreenManager;
-import vk_prison.utils.VKRequest;
+import vk_prison.vk.Friends;
+import vk_prison.vk.Wall;
 
 [SWF(width=807, height=454)]
 public class Prison extends Sprite {
@@ -27,7 +29,15 @@ public class Prison extends Sprite {
         sManager = new ScreenManager(this);
         qManager = new QuestionsManager();
 
-        toQuestionScreen();
+        toStartScreen();
+    }
+
+    private function toStartScreen():void {
+        sManager.showStartScreen(stage);
+        sManager.startBtn.addEventListener(MouseEvent.CLICK, function (e:Event):void {
+            toQuestionScreen();
+        });
+
     }
 
     private function toQuestionScreen():void {
@@ -64,8 +74,8 @@ public class Prison extends Sprite {
 
         sManager.resBtn.addEventListener(MouseEvent.CLICK, function (e:Event):void {
             toResultScreen();
-            var vkPost:VKRequest = new VKRequest(stage);
-            vkPost.post();
+            var vkWall:Wall = new Wall(stage);
+            vkWall.wallPostWithScreenshot();
         });
     }
 

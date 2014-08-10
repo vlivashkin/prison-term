@@ -4,7 +4,7 @@
 package vk_prison.data {
 public class QuestionsManager {
     private var _questions:Array = [];
-    private var _currentQuestion:uint = 0;
+    private var _currentQuestion:int = -1;
     private var _score:uint = 0;
 
     public function QuestionsManager() {
@@ -21,11 +21,11 @@ public class QuestionsManager {
     }
 
     public function getNextQuestion(btnNum:int):Question {
-        if (btnNum > 0) {
+        if (btnNum >= 0) {
             _score += _questions[_currentQuestion].answers[btnNum].score;
         }
+        _currentQuestion++;
         if (_questions.length > _currentQuestion) {
-            _currentQuestion++;
             return _questions[_currentQuestion];
         } else {
             return null;

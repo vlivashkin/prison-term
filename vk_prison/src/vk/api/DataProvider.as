@@ -11,6 +11,7 @@ public class DataProvider {
         _api_id = api_id;
         _viewer_id = viewer_id;
     }
+
     private var _api_sid:String;
     private var _api_url:String = "http://api.vkontakte.ru/api.php";
     private var _api_id:Number;

@@ -1,10 +1,15 @@
 package vk_prison.ui {
 import flash.display.Bitmap;
+import flash.display.DisplayObject;
 import flash.display.Sprite;
+import flash.display.Stage;
 import flash.text.TextField;
+
+import vk.gui.ListBox;
 
 import vk_prison.data.Question;
 import vk_prison.utils.TimeUtils;
+import vk_prison.vk.Friends;
 
 public class ScreenManager {
     [Embed(source='../../../img/bkg.jpg')]
@@ -13,39 +18,65 @@ public class ScreenManager {
     private var FinalBackground:Class;
 
     // Common Fields
-    private var sprite:Sprite;
-    private var bkg:Bitmap;
+    private var _sprite:Sprite;
+    private var _bkg:Bitmap;
 
     // Start Screen
+    private var _startBtn:PrisonButton;
+    private var _fListHeader:ListHeader;
+    private var _friendsList:ListBox;
 
     // Question Screen Fields
-    private var qNumField:TextField;
-    private var questionField:TextField;
+    private var _qNumField:TextField;
+    private var _questionField:TextField;
     private var _btn:Array;
 
-
     // Final Screen
-    private var finalTextField:TextField;
-
-    // Result Screen
+    private var _finalTextField:TextField;
     private var _resBtn:PrisonButton;
 
+    // Result Screen
+    private var _resultTextField:TextField;
+    private var _resultField:TextField;
+
+
     public function ScreenManager(sprite:Sprite) {
-        this.sprite = sprite;
+        _sprite = sprite;
     }
 
-    public function showStartScreen():void {
-        setBackground("common");
+    public function showStartScreen(stage:Stage):void {
+        setBackground("final");
+
+        _startBtn = new PrisonButton(153, 195, 280, 60, PrisonButton.TEXT_SIZE_GREAT);
+        _startBtn.updateLabel("Начать тест");
+        _sprite.addChild(_startBtn);
+
+        _fListHeader = new ListHeader(576, 10, 221, 40, "Сроки ваших друзей");
+        _sprite.addChild(_fListHeader);
+
+        _friendsList = new ListBox(576, 44, 220);
+        _sprite.addChild(_friendsList);
+
+        var vkFriends:Friends = new Friends(stage);
+        vkFriends.getFriendsList(onFriendsListLoaded);
     }
+
+    private function onFriendsListLoaded(data:Object):void {
+        for each (var guy:Object in data) {
+            _friendsList.addItem(guy.photo, guy.first_name + " " + guy.last_name);
+        }
+    }
+
+
 
     public function showQuestionScreen():void {
         setBackground("common");
 
-        qNumField = Creator.createQNumField();
-        sprite.addChild(qNumField);
+        _qNumField = FieldGenerator.createQNumField();
+        _sprite.addChild(_qNumField);
 
-        questionField = Creator.createQuestionField();
-        sprite.addChild(questionField);
+        _questionField = FieldGenerator.createQuestionField();
+        _sprite.addChild(_questionField);
 
         _btn = [];
         _btn.push(
@@ -56,14 +87,14 @@ public class ScreenManager {
         );
 
         for (var i:uint = 0; i < _btn.length; i++) {
-            sprite.addChild(_btn[i]);
+            _sprite.addChild(_btn[i]);
         }
     }
 
     public function showNextQuestion(question:Question):void {
-        qNumField.text = "Вопрос " + question.number + " из 10.";
+        _qNumField.text = "Вопрос " + question.number + " из 10.";
 
-        questionField.text = question.question;
+        _questionField.text = question.question;
 
         for (var i:uint = 0; i < _btn.length; i++) {
             var text:String = question.answers[i].value;
@@ -79,62 +110,51 @@ public class ScreenManager {
     public function showFinalScreen():void {
         setBackground("final");
 
-        bkg.visible = false;
-        qNumField.visible = false;
-        questionField.visible = false;
-        for (var i:uint = 0; i < _btn.length; i++) {
-            _btn[i].visible = false;
-        }
+        _finalTextField = FieldGenerator.createFinalTextField();
+        _finalTextField.text = "Тест окончен.";
+        _sprite.addChild(_finalTextField);
 
-        finalTextField = Creator.createFinalTextField();
-        finalTextField.text = "Тест окончен.";
-        sprite.addChild(finalTextField);
-
-        _resBtn = new PrisonButton(287, 267, 232, 47, "primary");
+        _resBtn = new PrisonButton(287, 267, 232, 47, PrisonButton.TEXT_SIZE_BIG);
         _resBtn.updateLabel("Узнать результат");
-        sprite.addChild(_resBtn);
+        _sprite.addChild(_resBtn);
     }
 
     public function showResultScreen(score:uint):void {
         setBackground("final");
 
-        finalTextField.visible = false;
-        _resBtn.visible = false;
+        _resultTextField = FieldGenerator.createResultTextField();
+        _resultTextField.text = "Мой психологический\nтюремный срок:";
+        _sprite.addChild(_resultTextField);
 
-        var resultTextField:TextField = Creator.createResultTextField();
-        resultTextField.text = "Мой психологический\nтюремный срок:";
-        sprite.addChild(resultTextField);
-
-        var resultField:TextField = Creator.createResultField();
-        resultField.text = score + " " + TimeUtils.getUnit(score);
-        sprite.addChild(resultField);
+        _resultField = FieldGenerator.createResultField();
+        _resultField.text = score + " " + TimeUtils.getUnit(score);
+        _sprite.addChild(_resultField);
     }
 
     public function clearControls():void {
-        if (qNumField != null) {
-            sprite.removeChild(qNumField);
-            qNumField = null;
-        }
-        if (questionField != null) {
-            sprite.removeChild(questionField);
-            questionField = null;
-        }
+        remove(_qNumField);
+        remove(_questionField);
         if (_btn != null) {
-            _btn.forEach(function(button:PrisonButton):void {
-                sprite.removeChild(button);
-            });
-            _btn  = null;
+            for each (var button:PrisonButton in _btn){
+                remove(button);
+            }
+            _btn = null;
         }
-        if (finalTextField != null) {
-            sprite.removeChild(finalTextField);
-            finalTextField = null;
-        }
-        if (_resBtn != null) {
-            sprite.removeChild(_resBtn);
-            _resBtn = null;
+        remove(_finalTextField);
+        remove(_resBtn);
+    }
+
+    private static function remove(child:DisplayObject):void {
+        if(child && child.parent) {
+            child.parent.removeChild(child);
+            child = null;
         }
     }
 
+
+    public function get startBtn():PrisonButton {
+        return _startBtn;
+    }
 
     public function get btn():Array {
         return _btn;
@@ -145,18 +165,18 @@ public class ScreenManager {
     }
 
     private function setBackground(bkgType:String):void {
-        if (bkg != null) {
-            sprite.removeChild(bkg);
+        if (_bkg != null) {
+            _sprite.removeChild(_bkg);
         }
         if(bkgType == "common") {
-            bkg = new CommonBackground();
-            sprite.addChild(bkg);
+            _bkg = new CommonBackground();
+            _sprite.addChild(_bkg);
         } else if (bkgType == "final") {
-            bkg = new FinalBackground();
-            sprite.addChild(bkg);
+            _bkg = new FinalBackground();
+            _sprite.addChild(_bkg);
         } else {
-            bkg = new CommonBackground();
-            sprite.addChild(bkg);
+            _bkg = new CommonBackground();
+            _sprite.addChild(_bkg);
         }
     }
 }

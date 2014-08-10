@@ -8,6 +8,10 @@ import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
 
 public class PrisonButton extends SimpleButton {
+    static public const TEXT_SIZE_NORMAL:uint = 0;
+    static public const TEXT_SIZE_BIG:uint = 1;
+    static public const TEXT_SIZE_GREAT:uint = 2;
+
     [Embed(systemFont="Calibri",
             fontName="CalibriCustom",
             mimeType="application/x-font",
@@ -17,16 +21,20 @@ public class PrisonButton extends SimpleButton {
             embedAsCFF="false")]
     private var CalibriCustom:Class;
 
-    public function PrisonButton(x:uint, y:uint, width:uint, height:uint, buttonType:String = "common") {
+    public function PrisonButton(x:uint, y:uint, width:uint, height:uint, buttonType:uint = TEXT_SIZE_NORMAL) {
         var textSize:uint;
         var textY:int;
 
         switch (buttonType) {
-            case "primary":
+            case TEXT_SIZE_GREAT:
+                textSize = 30;
+                textY = -6;
+                break;
+            case TEXT_SIZE_BIG:
                 textSize = 24;
                 textY = -4;
                 break;
-            case "common":
+            case TEXT_SIZE_NORMAL:
             default:
                 textSize = 17;
                 textY = 0;

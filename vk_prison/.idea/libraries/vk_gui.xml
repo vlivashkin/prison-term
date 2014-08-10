@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="vk_gui" type="flex">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/vk_gui.swc!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
