@@ -1,5 +1,5 @@
 package vk_prison.utils {
-public class Helper {
+public class TimeUtils {
     public static function getUnit(ages:uint):String {
         var last_two:uint = LastTwoDigits(ages);
         if ((last_two >= 11) && (last_two <= 14)) {
@@ -23,7 +23,7 @@ public class Helper {
         return ages % 10;
     }
 
-    public function Helper() {
+    public function TimeUtils() {
     }
 
 
