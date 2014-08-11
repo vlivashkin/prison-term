@@ -5,9 +5,10 @@ import flash.display.Sprite;
 import flash.display.Stage;
 import flash.text.TextField;
 
-import vk.gui.ListBox;
+import vk_prison.ui.vk.ListBox;
 
 import vk_prison.data.Question;
+import vk_prison.ui.vk.ListHeader;
 import vk_prison.utils.TimeUtils;
 import vk_prison.vk.Friends;
 

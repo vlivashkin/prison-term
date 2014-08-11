@@ -1,9 +1,11 @@
-﻿package vk.gui {
+﻿package vk_prison.ui.vk {
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
+
+import vk_prison.ui.vk.Utils;
 
 public class ScrollButton extends Sprite {
     public function ScrollButton(x:int, y:int, downArrow:Boolean) {

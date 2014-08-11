@@ -1,13 +1,9 @@
-/**
- * Created by wawilon on 10.08.2014.
- */
-package vk_prison.ui {
+package vk_prison.ui.vk {
 import flash.display.Sprite;
 import flash.text.TextField;
-import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
 
-import vk.gui.Utils;
+import vk_prison.ui.vk.Utils;
 
 public class ListHeader extends Sprite {
     public function ListHeader(x:uint, y:uint, w:uint, h:uint, s:String) {

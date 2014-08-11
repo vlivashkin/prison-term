@@ -1,4 +1,5 @@
-﻿package vk.gui {
+﻿package vk_prison.ui.vk {
+
 import flash.display.Loader;
 import flash.display.Shape;
 import flash.display.Sprite;
@@ -19,7 +20,7 @@ internal class ComboItem extends Sprite {
     private var loader:Loader;
     private var roundRect:Shape;
 
-    public function ComboItem(par:*, p:String, s:String, idx:int, w:int):void {
+    public function ComboItem(par:*, photoURL:String, name:String, idx:int, w:int):void {
         this.par = par;
         this.idx = idx;
         this.w = w;
@@ -35,7 +36,7 @@ internal class ComboItem extends Sprite {
         addChild(roundRect);
 
         loader = addChild(new Loader()) as Loader;
-        loader.load(new URLRequest(p));
+        loader.load(new URLRequest(photoURL));
         loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
         loader.x = 10;
         loader.y = 8;
@@ -45,7 +46,7 @@ internal class ComboItem extends Sprite {
         myFormat.bold = true;
         myFormat.color = 0x45688e;
 
-        txt = Utils.addText(60, 8, w, 11, s);
+        txt = Utils.addText(60, 8, w, 11, name);
         txt.setTextFormat(myFormat);
         addChild(txt);
 
@@ -67,7 +68,7 @@ internal class ComboItem extends Sprite {
         if (!par.enMouse)
             return;
 
-        if (par.owner == null) // Parent is Listbox, not ComboBox
+        if (par.owner == null)
         {
             if (par.selY != y)
                 Utils.rect(this, 0, 1, w, ListBox.ITEM_H - 1, Utils.ARROW_BG_COL, Utils.ARROW_BG_BORDER_COL);

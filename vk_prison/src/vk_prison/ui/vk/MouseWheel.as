@@ -5,7 +5,7 @@
  * (including removing this header or changing the package path).
  */
 
-package vk.gui {
+package vk_prison.ui.vk {
 import flash.display.Loader;
 import flash.events.AsyncErrorEvent;
 import flash.events.Event;
@@ -16,7 +16,7 @@ import flash.utils.ByteArray;
 public final class MouseWheel {
     private static const bb:ByteArray = new ByteArray();
     private static const conn:LocalConnection = new LocalConnection();
-    private static const dt0:Array = new Array(
+    private static const dt0:Array = [
             0x46575309,
             0x28010000,
             0x7800055F,
@@ -32,10 +32,9 @@ public final class MouseWheel {
             0x63616C43,
             0x6F6E6E65,
             0x6374696F,
-            0x6E006C63
-    );
+            0x6E006C63];
 
-    private static const dt1:Array = new Array(
+    private static const dt1:Array = [
             0x00636F6E,
             0x6E656374,
             0x00636170,
@@ -91,8 +90,7 @@ public final class MouseWheel {
             0x00000008,
             0x001C9602,
             0x00080452,
-            0x17004000
-    );
+            0x17004000];
 
     private static var ldr:Loader;
     private static var connID:uint;

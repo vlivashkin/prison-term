@@ -1,6 +1,6 @@
 ﻿// As agreed, all these functions and constants are public, but not documented yet.
 
-package vk.gui {
+package vk_prison.ui.vk {
 import flash.display.CapsStyle;
 import flash.display.DisplayObject;
 import flash.display.JointStyle;
