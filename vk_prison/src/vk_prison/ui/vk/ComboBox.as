@@ -1,18 +1,21 @@
 ﻿package vk_prison.ui.vk {
-
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.display.Sprite;
 import flash.events.Event;
+import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.text.TextField;
 import flash.utils.Timer;
 
+/**
+ * @author Alexey Kharkov
+ */
 public class ComboBox extends Sprite {
     private static const W:uint = 16;
     private static const H:uint = 21;
-    private static const TIMER_DELAY:uint = 33;
+    private static const TIMER_DELAY:uint = 33; // "Down Arrow" BackGround
 
     public function ComboBox(wrapper:*, x:int, y:int, w:int):void {
         this.x = x;
@@ -47,7 +50,7 @@ public class ComboBox extends Sprite {
         addChild(rc);
 
         // Text field
-        var txt:TextField = Utils.addText(4, 2, w - W, 11, "");
+        txt = Utils.addText(4, 2, w - W, 11, "");
         txt.mouseEnabled = false;
         addChild(txt);
 
@@ -57,13 +60,14 @@ public class ComboBox extends Sprite {
         dd.owner = this;
         addChild(dd);
 
+        //
         bg.addEventListener(MouseEvent.MOUSE_DOWN, onClick);
         addEventListener(MouseEvent.ROLL_OVER, onOver);
         if (wrapper != null)
             wrapper.addEventListener("onWindowBlur", onWindowBlur);
-    }
-
+    } // DropDown
     private var wrapper:* = null;
+    private var txt:TextField = null;
     private var da_bg:Sprite = null; // width of "Down Arrow BackGround"
     private var dd:ListBox = null; // height of the text field
     private var mouseOver:Boolean = false;
@@ -77,14 +81,57 @@ public class ComboBox extends Sprite {
         return dd.y + (dd.visible ? dd.height : 0);
     }
 
+    public function get selectedIndex():int {
+        return dd.selectedIndex;
+    }
+
+    public function set selectedIndex(idx:int):void {
+        dd.selectedIndex = idx;
+    }
 
     public function get length():uint {
         return dd.length;
     }
 
+    public function clear():void {
+        dd.clear();
+    }
+
+    public function addItemsArray(arr:Array):void {
+        if (dd.length == 0 && arr.length > 0)
+            setCurTxt(arr[0]);
+
+        dd.addItemsArray(arr);
+    }
+
+    public function addItem(s:String):void {
+        if (dd.length == 0)
+            setCurTxt(s);
+
+        dd.addItem(null, s);
+    }
+
+    // ---------------------------------------------------------------------------- internal methods.
+
+    internal function onItemClick(item:*, b:Boolean):void {
+        setCurTxt(item.txt.text);
+        dispatchEvent(new Event(Event.CHANGE));
+
+        if (b)
+            showDropDown(!dd.visible);
+    }
+
+    // ---------------------------------------------------------------------------- private methods.
+    private function setCurTxt(s:String):void {
+        txt.text = s;
+        txt.setTextFormat(Utils.getTxtFormat(11, 0));
+    }
+
     private function showDropDown(b:Boolean):void {
         if (root == null)
             return;
+
+        dd.reset();
 
         if (b) {
             // Show DropDown
@@ -92,6 +139,17 @@ public class ComboBox extends Sprite {
 
             (parent as DisplayObjectContainer).setChildIndex(this, (parent as DisplayObjectContainer).numChildren - 1);
 
+            // Keys control
+            Utils.topParent(this).addEventListener(KeyboardEvent.KEY_DOWN, dd.onComboKeyDown);
+            /*if ( wrapper != null )
+             {
+             if ( wrapper.parent as DisplayObject != null )
+             wrapper.parent.addEventListener( KeyboardEvent.KEY_DOWN, dd.onComboKeyDown );
+             else
+             wrapper.addEventListener( KeyboardEvent.KEY_DOWN, dd.onComboKeyDown );
+             }*/
+
+            //
             root.addEventListener(MouseEvent.MOUSE_DOWN, onStageClick);
             MouseWheel.capture();
         } else {
@@ -100,12 +158,25 @@ public class ComboBox extends Sprite {
             if (!mouseOver)
                 da_bg.alpha = 0.0;
 
+            // Keys control
+            Utils.topParent(this).removeEventListener(KeyboardEvent.KEY_DOWN, dd.onComboKeyDown);
+            /*if ( wrapper != null )
+             {
+             if ( wrapper.parent as DisplayObject != null )
+             wrapper.parent.removeEventListener( KeyboardEvent.KEY_DOWN, dd.onComboKeyDown );
+             else
+             wrapper.removeEventListener( KeyboardEvent.KEY_DOWN, dd.onComboKeyDown );
+             }*/
+
+            //
             root.removeEventListener(MouseEvent.MOUSE_DOWN, onStageClick);
             MouseWheel.release();
         }
 
         dispatchEvent(new Event(Event.RESIZE));
     }
+
+    // -----------------------------------------------------------------------  Over/Out animation
 
     private function startAnim(over:Boolean):void {
         if (timer.running)
@@ -127,6 +198,8 @@ public class ComboBox extends Sprite {
             timer.stop();
         }
     }
+
+    // ----------------------------------------------------------------------- Event handlers
 
     private function timerHandler2(e:TimerEvent):void {
         da_bg.alpha -= 0.2;

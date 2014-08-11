@@ -1,9 +1,12 @@
 ﻿package vk_prison.ui.vk {
-
 import flash.display.Sprite;
 import flash.events.Event;
+import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 
+/**
+ * @author Alexey Kharkov
+ */
 public class ListBox extends Sprite {
     static internal const ITEM_H:uint = 50;
     static private const W:uint = 16; // Currently active item
@@ -16,11 +19,15 @@ public class ListBox extends Sprite {
 
         items = [];
 
+        //Dbg.init( this );
+
         //mouseEnabled = false;
         buttonMode = true;
 
         // Selection rects
         sel = new Sprite();
+        //Utils.rect( sel, 0, 1, w, ITEM_H - 1, Utils.SEL_BG_COL, Utils.SEL_BG_BORDER_COL );
+        //drawSel( w );
         sel.mouseEnabled = false;
         addChild(sel);
         sel.mask = maskRect();
@@ -31,16 +38,23 @@ public class ListBox extends Sprite {
         sb.addEventListener(Event.SCROLL, onScroll);
         addChild(sb);
 
+        // Keys control
+        addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+
+
         drawBg();
 
         addEventListener(MouseEvent.ROLL_OVER, onOver);
         addEventListener(MouseEvent.ROLL_OUT, onOut);
         addEventListener(MouseEvent.MOUSE_WHEEL, onWheel);
     }
+
     internal var sel:Sprite = null; // Highlighting rectangle
     internal var owner:ComboBox = null;
     internal var enMouse:Boolean = true;
     private var items:Array = null;
+    private var cur:ComboItem = null;
+    private var hl:ComboItem = null; // ScrollBar width
     private var w:int = 0;
     private var sb:ScrollBar = null;
 
@@ -52,13 +66,32 @@ public class ListBox extends Sprite {
         return Math.min(length, ITEMS_COUNT_TO_SCROLL) * ITEM_H;
     }
 
+    public function get selectedIndex():int {
+        return (cur != null) ? cur.idx : 0;
+    }
+
+    public function set selectedIndex(idx:int):void {
+        if (idx >= 0 && idx < length) {
+            onItemClick(items[idx], false);
+            scrollToCur();
+        }
+    }
+
     public function get length():uint {
         return items.length;
     }
 
+    internal function get selY():int {
+        return sel.y;
+    }
+
     public function clear():void {
+        cur = null;
         items = [];
         clearLayout();
+
+        // Reset Selection Rect
+        //drawSel( w );
 
         // Reset ScrollBar
         sb.init(0, ITEMS_COUNT_TO_SCROLL);
@@ -66,15 +99,56 @@ public class ListBox extends Sprite {
         sb.visible = false;
     }
 
+    public function addItemsArray(arr:Array):void {
+        for (var i:uint = 0; i < arr.length; ++i)
+            addItemHelper(null, arr[i]);
+
+        upd();
+    }
+
     public function addItem(photoURL:String, name:String):void {
         addItemHelper(photoURL, name);
         upd();
     }
 
+    // ---------------------------------------------------------------------------- internal methods.
+
+    internal function setItemActive(item:*):void {
+        //if (hl != null)
+        //    hl.txt.textColor = 0;
+
+        hl = item;
+        sel.y = item.y;
+        //item.txt.textColor = 0xffffff;
+    }
+
+    internal function onItemClick(item:*, b:Boolean):void {
+        cur = item;
+        setItemActive(item);
+
+        if (owner == null)
+            dispatchEvent(new Event(Event.CHANGE));
+        else
+            owner.onItemClick(item, b);
+    }
+
+    internal function reset():void {
+        setItemActive(cur);
+        scrollToCur();
+    }
+
+    // ---------------------------------------------------------------------------- private methods.
+
     private function addItemHelper(photoURL:String, name:String):void {
         var idx:int = length;
         var item:ComboItem = new ComboItem(this, photoURL, name, idx, w);
         item.y = idx * ITEM_H - 1;
+
+        if (idx == 0) {
+            cur = item;
+            hl = item;
+            setItemActive(item);
+        }
 
         items.push(item);
     }
@@ -87,8 +161,29 @@ public class ListBox extends Sprite {
             sb.scrollPosition = 0;
 
             sb.visible = true;
+
+            //if ( length == 1 + ITEMS_COUNT_TO_SCROLL )
+            //{
+            //drawSel( w - W - 1 );
+            //}
         } else
             reDraw();
+    }
+
+    private function scrollToCur():void {
+        if (cur.y < 0 || cur.y >= ITEMS_COUNT_TO_SCROLL * ITEM_H - 1) {
+            sb.scrollPosition = cur.idx - ITEMS_COUNT_TO_SCROLL / 3;
+            reDraw();
+        }
+    }
+
+    private function scrollToBounds(item:ComboItem):void {
+        if (item.y < 0) {
+            sb.scrollPosition = item.idx;
+        } else if (item.y >= ITEMS_COUNT_TO_SCROLL * ITEM_H - 1) {
+            sb.scrollPosition = item.idx - ITEMS_COUNT_TO_SCROLL + 1;
+        }
+        reDraw();
     }
 
     private function maskRect():Sprite {
@@ -111,7 +206,16 @@ public class ListBox extends Sprite {
         }
     }
 
+    //private function drawSel( ww:uint ):void
+    //{
+    //  sel.graphics.clear();
+    //  Utils.rect( sel, 0, 1, ww, ITEM_H - 1, Utils.SEL_BG_COL, Utils.SEL_BG_BORDER_COL );
+    //}
+
     private function reDraw():void {
+        //removeEventListener( MouseEvent.ROLL_OVER, onOver );
+        //removeEventListener( MouseEvent.ROLL_OUT, onOut );
+
         clearLayout();
 
         var yy:uint = -ITEM_H * Math.round(sb.scrollPosition);
@@ -126,6 +230,10 @@ public class ListBox extends Sprite {
         }
 
         setChildIndex(sb, numChildren - 1);
+        setItemActive(hl);
+
+        //addEventListener( MouseEvent.ROLL_OVER, onOver );
+        //addEventListener( MouseEvent.ROLL_OUT, onOut );
     }
 
     private function clearLayout():void {
@@ -140,13 +248,58 @@ public class ListBox extends Sprite {
 
     // ----------------------------------------------------------------------- Event handlers
 
+    internal function onComboKeyDown(e:KeyboardEvent):void {
+        enMouse = false;
+        if (e.keyCode == 13) {
+            onItemClick(hl, true);
+        } else if (e.keyCode == 38) {
+            if (hl.idx > 0) {
+                setItemActive(items[hl.idx - 1]);
+                scrollToBounds(hl);
+            }
+        } else if (e.keyCode == 40) {
+            if (hl.idx < length - 1) {
+                setItemActive(items[hl.idx + 1]);
+                scrollToBounds(hl);
+            }
+        }
+        addEventListener(MouseEvent.MOUSE_MOVE, function (e:MouseEvent):void {
+            enMouse = true;
+        });
+    }
+
+    private function onKeyDown(e:KeyboardEvent):void {
+        if (owner != null)
+            return;
+
+        enMouse = false;
+        if (e.keyCode == 38) {
+            if (selectedIndex > 0) {
+                onItemClick(items[selectedIndex - 1], false);
+                scrollToBounds(cur);
+                hl.graphics.clear();
+            }
+        } else if (e.keyCode == 40) {
+            if (selectedIndex < length - 1) {
+                onItemClick(items[selectedIndex + 1], false);
+                scrollToBounds(cur);
+                hl.graphics.clear();
+            }
+        }
+        addEventListener(MouseEvent.MOUSE_MOVE, function (e:MouseEvent):void {
+            enMouse = true;
+        });
+    }
+
     private function onOver(e:MouseEvent):void {
+        //Dbg.log( "onOver( " + mouseX + ", " + mouseY + " ),  " + x + ", " + y + " - " + (x+width) + ", " + (y+height) + "     hitTest " + mouseInside() );
         if (e.target == this && owner == null) {
             MouseWheel.capture();
         }
     }
 
     private function onOut(e:MouseEvent):void {
+        //Dbg.log( "onOut( " + mouseX + ", " + mouseY + " ),  " + x + ", " + y + " - " + (x+width) + ", " + (y+height) + "     hitTest " + mouseInside() );
         if (e.target == this && owner == null && !mouseInside()) {
             MouseWheel.release();
         }

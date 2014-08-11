@@ -1,5 +1,4 @@
-﻿package vk_prison.ui.vk {
-
+package vk_prison.ui.vk {
 import flash.display.Loader;
 import flash.display.Shape;
 import flash.display.Sprite;
@@ -9,17 +8,11 @@ import flash.net.URLRequest;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
+
 /**
  * @author Alexey Kharkov
  */
 internal class ComboItem extends Sprite {
-    public var txt:TextField = null;
-    public var idx:int = 0;
-    private var par:* = null;
-    private var w:uint = 1;
-    private var loader:Loader;
-    private var roundRect:Shape;
-
     public function ComboItem(par:*, photoURL:String, name:String, idx:int, w:int):void {
         this.par = par;
         this.idx = idx;
@@ -52,10 +45,18 @@ internal class ComboItem extends Sprite {
 
         addEventListener(MouseEvent.MOUSE_OVER, onOver);
         addEventListener(MouseEvent.MOUSE_OUT, onOut);
+        addEventListener(MouseEvent.MOUSE_DOWN, onDown);
 
         buttonMode = true;
         mouseChildren = false;
     }
+
+    public var txt:TextField = null;
+    public var idx:int = 0;
+    private var par:* = null;
+    private var w:uint = 1;
+    private var loader:Loader;
+    private var roundRect:Shape;
 
     internal function onImageLoaded(e:Event):void {
         loader.content.height = 38;
@@ -63,12 +64,12 @@ internal class ComboItem extends Sprite {
         loader.content.mask = roundRect;
     }
 
-
+    // ----------------------------------------------------------------------- Events handlers
     private function onOver(e:MouseEvent):void {
         if (!par.enMouse)
             return;
 
-        if (par.owner == null)
+        if (par.owner == null) // Parent is Listbox, not ComboBox
         {
             if (par.selY != y)
                 Utils.rect(this, 0, 1, w, ListBox.ITEM_H - 1, Utils.ARROW_BG_COL, Utils.ARROW_BG_BORDER_COL);
@@ -82,7 +83,7 @@ internal class ComboItem extends Sprite {
     }
 
     private function onDown(e:MouseEvent):void {
-        graphics.clear();
+        //graphics.clear();
         par.onItemClick(this, true);
     }
 }

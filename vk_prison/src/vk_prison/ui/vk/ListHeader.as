@@ -3,8 +3,6 @@ import flash.display.Sprite;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
-import vk_prison.ui.vk.Utils;
-
 public class ListHeader extends Sprite {
     public function ListHeader(x:uint, y:uint, w:uint, h:uint, s:String) {
         var myFormat:TextFormat = new TextFormat();
