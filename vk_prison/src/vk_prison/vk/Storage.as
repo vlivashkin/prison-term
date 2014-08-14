@@ -24,6 +24,11 @@ public class Storage {
 
         _VK.api("getVariable", {key: 1504, user_id: uid},
         function(data:Object):void {
+            if (data == "") {
+                var score:uint = DateUtils.getRandomNumber(10, 25);
+                setScore(score);
+                data = score.toString();
+            }
             onSuccess(data);
         }, function(data:Object):void {
             if (data.error_code == 6) {

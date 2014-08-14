@@ -1,12 +1,10 @@
 package vk_prison.vk {
-import flash.display.BitmapData;
+import com.adobe.images.JPGEncoder;
+
 import flash.display.BitmapData;
 import flash.display.Stage;
 import flash.events.Event;
-import flash.geom.Matrix;
 import flash.utils.ByteArray;
-
-import com.adobe.images.JPGEncoder;
 
 import ru.inspirit.net.MultipartURLLoader;
 

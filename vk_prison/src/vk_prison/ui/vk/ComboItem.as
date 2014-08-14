@@ -47,7 +47,7 @@ internal class ComboItem extends Sprite {
         myFormat.bold = true;
         myFormat.color = 0x45688e;
 
-        txt = Utils.addText(60, 9, w, 11, name);
+        txt = Utils.addText(60, 8, w, 11, name);
         txt.setTextFormat(myFormat);
         addChild(txt);
 
