@@ -1,35 +1,49 @@
-/**
- * Created by wawilon on 11.08.2014.
- */
 package vk_prison.vk {
-import flash.display.Stage;
+
+import flash.events.Event;
+import flash.events.TimerEvent;
+import flash.utils.Timer;
 
 import vk.APIConnection;
 
+import vk_prison.utils.DateUtils;
+
 public class Storage {
-    public function Storage(stage:Stage) {
-        this.stage = stage;
-        flashVars = stage.loaderInfo.parameters as Object;
+    internal var _VK:APIConnection;
 
-        if (!flashVars.api_id) {
-            flashVars['api_id'] = 4428337;
-            flashVars['viewer_id'] = 41624918;
-            flashVars['sid'] = "49cebb47d3ea03abba45d7b118eff6c71e365162c2207dc80cb7965417dd5b83b1b682952caaaa76a853b";
-            flashVars['secret'] = "c2622ebb94";
-        }
-
-        VK = new APIConnection(flashVars);
+    public function Storage() {
+        _VK = Config.getInstance().VK;
     }
-    internal var stage:Stage;
-    internal var flashVars:Object;
-    internal var VK:APIConnection;
+
+    internal var _uid:uint;
+    internal var _onSuccess:Function;
 
     public function getScore(uid:uint, onSuccess:Function):void {
-        VK.api("getVariable", {key: 1504, user_id: uid},
+        _uid = uid;
+        _onSuccess = onSuccess;
+
+        _VK.api("getVariable", {key: 1504, user_id: uid},
         function(data:Object):void {
             onSuccess(data);
         }, function(data:Object):void {
-            trace("Fail storage.get with error_msg: " + data.error_msg + "\n");
+            if (data.error_code == 6) {
+                var _timer:Timer = new Timer(DateUtils.getRandomNumber(100, 2000), 1);
+                _timer.addEventListener(TimerEvent.TIMER, onComplete);
+                _timer.start();
+            }
+        });
+    }
+
+    internal function onComplete(e:Event):void {
+        getScore(_uid, _onSuccess);
+    }
+
+    public function setScore(score:uint):void {
+        _VK.api("putVariable", {key: 1504, value: score},
+        function (data:Object):void {
+
+        }, function (data:Object):void {
+
         });
     }
 }

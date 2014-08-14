@@ -1,19 +1,26 @@
 package vk_prison.ui.vk {
 import flash.display.Loader;
+import flash.display.LoaderInfo;
 import flash.display.Shape;
 import flash.display.Sprite;
 import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.events.MouseEvent;
 import flash.net.URLRequest;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
+import vk_prison.utils.DateUtils;
+import vk_prison.vk.Storage;
 
-/**
- * @author Alexey Kharkov
- */
 internal class ComboItem extends Sprite {
-    public function ComboItem(par:*, photoURL:String, name:String, idx:int, w:int):void {
+    public var txt:TextField = null;
+    public var idx:int = 0;
+    private var par:* = null;
+    private var w:uint = 1;
+    private var roundRect:Shape;
+
+    public function ComboItem(par:*, uid:uint, name:String, photoURL:String, idx:int, w:int):void {
         this.par = par;
         this.idx = idx;
         this.w = w;
@@ -24,12 +31,13 @@ internal class ComboItem extends Sprite {
         addChild(bkgRect);
 
         roundRect = new Shape();
-        roundRect.graphics.beginFill(0x006600, 1);
+        roundRect.graphics.beginFill(0xffffff, 1);
         roundRect.graphics.drawRoundRect(10, 8, 38, 38, 4, 4);
         addChild(roundRect);
 
-        loader = addChild(new Loader()) as Loader;
+        var loader:Loader = addChild(new Loader()) as Loader;
         loader.load(new URLRequest(photoURL));
+        loader.contentLoaderInfo.addEventListener(Event.INIT, onImageLoaded);
         loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
         loader.x = 10;
         loader.y = 8;
@@ -39,9 +47,12 @@ internal class ComboItem extends Sprite {
         myFormat.bold = true;
         myFormat.color = 0x45688e;
 
-        txt = Utils.addText(60, 8, w, 11, name);
+        txt = Utils.addText(60, 9, w, 11, name);
         txt.setTextFormat(myFormat);
         addChild(txt);
+
+        var vkStorage:Storage = new Storage();
+        vkStorage.getScore(uid, onScoreLoaded);
 
         addEventListener(MouseEvent.MOUSE_OVER, onOver);
         addEventListener(MouseEvent.MOUSE_OUT, onOut);
@@ -51,31 +62,36 @@ internal class ComboItem extends Sprite {
         mouseChildren = false;
     }
 
-    public var txt:TextField = null;
-    public var idx:int = 0;
-    private var par:* = null;
-    private var w:uint = 1;
-    private var loader:Loader;
-    private var roundRect:Shape;
+    internal function onScoreLoaded(data:Object):void {
+        var score:String = data.toString();
 
-    internal function onImageLoaded(e:Event):void {
-        loader.content.height = 38;
-        loader.content.width = 38;
-        loader.content.mask = roundRect;
+        var myFormat:TextFormat = new TextFormat();
+        myFormat.bold = true;
+        myFormat.color = 0x45688e;
+
+        trace("Срок " + score + DateUtils.getUnit(parseInt(score, 10)));
+        txt = Utils.addText(60, 27, w, 11, "Срок: " + score + " " + DateUtils.getUnit(parseInt(score, 10)));
+        txt.setTextFormat(myFormat);
+        addChild(txt);
     }
 
-    // ----------------------------------------------------------------------- Events handlers
+    internal function onImageLoaded(event:Event):void {
+        var loaderInfo:LoaderInfo = LoaderInfo(event.target);
+
+        if (loaderInfo.bytesLoaded == loaderInfo.bytesTotal) {
+            EventDispatcher(event.target).removeEventListener(event.type, arguments.callee);
+            loaderInfo.loader.scaleX = 38 / loaderInfo.width;
+            loaderInfo.loader.scaleY = 38 / loaderInfo.height;
+            loaderInfo.loader.mask = roundRect;
+        }
+    }
+
     private function onOver(e:MouseEvent):void {
         if (!par.enMouse)
             return;
 
-        if (par.owner == null) // Parent is Listbox, not ComboBox
-        {
-            if (par.selY != y)
-                Utils.rect(this, 0, 1, w, ListBox.ITEM_H - 1, Utils.ARROW_BG_COL, Utils.ARROW_BG_BORDER_COL);
-        }
-        else
-            par.setItemActive(this);
+        if (par.selY != y)
+            Utils.rect(this, 0, 1, w, ListBox.ITEM_H - 1, Utils.ARROW_BG_COL, Utils.ARROW_BG_BORDER_COL);
     }
 
     private function onOut(e:MouseEvent):void {
@@ -83,8 +99,7 @@ internal class ComboItem extends Sprite {
     }
 
     private function onDown(e:MouseEvent):void {
-        //graphics.clear();
-        par.onItemClick(this, true);
+
     }
 }
 }

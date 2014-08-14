@@ -1,11 +1,15 @@
 package vk_prison {
+import flash.display.BitmapData;
 import flash.display.Sprite;
 import flash.events.*;
+import flash.geom.Matrix;
 
 import vk_prison.data.Question;
 import vk_prison.data.QuestionsManager;
 import vk_prison.ui.ScreenManager;
+import vk_prison.vk.Config;
 import vk_prison.vk.Friends;
+import vk_prison.vk.Storage;
 import vk_prison.vk.Wall;
 
 [SWF(width=807, height=454)]
@@ -29,11 +33,24 @@ public class Prison extends Sprite {
         sManager = new ScreenManager(this);
         qManager = new QuestionsManager();
 
-        toStartScreen();
+        sManager.setBackground("final");
+
+        Config.getInstance().initFlashVars(stage);
+
+        var vkFriends:Friends = new Friends();
+        vkFriends.getFriendsList(onFriendsListLoaded);
     }
 
-    private function toStartScreen():void {
-        sManager.showStartScreen(stage);
+    private function onFriendsListLoaded(friendsList:Object):void {
+        if (friendsList) {
+            toStartScreen(friendsList);
+        } else {
+            toQuestionScreen();
+        }
+    }
+
+    private function toStartScreen(friendsList:Object):void {
+        sManager.showStartScreen(friendsList);
         sManager.startBtn.addEventListener(MouseEvent.CLICK, function (e:Event):void {
             toQuestionScreen();
         });
@@ -74,14 +91,23 @@ public class Prison extends Sprite {
 
         sManager.resBtn.addEventListener(MouseEvent.CLICK, function (e:Event):void {
             toResultScreen();
+
+            var snapshot:BitmapData = new BitmapData(stage.width, stage.height);
+            snapshot.draw(stage, new Matrix());
+
+            sManager.clearControls();
+
             var vkWall:Wall = new Wall(stage);
-            vkWall.wallPostWithScreenshot();
+            vkWall.wallPostWithScreenshot(snapshot, toResultScreen);
         });
     }
 
     private function toResultScreen():void {
         sManager.clearControls();
         sManager.showResultScreen(qManager.score);
+
+        var vkStorage:Storage = new Storage();
+        vkStorage.setScore(qManager.score);
     }
 }
 }

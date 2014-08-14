@@ -1,5 +1,5 @@
 package vk_prison.utils {
-public class TimeUtils {
+public class DateUtils {
     public static function getUnit(ages:uint):String {
         var last_two:uint = LastTwoDigits(ages);
         if ((last_two >= 11) && (last_two <= 14)) {
@@ -23,9 +23,9 @@ public class TimeUtils {
         return ages % 10;
     }
 
-    public function TimeUtils() {
+    public static function getRandomNumber(low:uint, high:uint):uint {
+        return Math.floor(Math.random()*(1+high-low))+low;
     }
-
 
 }
 }

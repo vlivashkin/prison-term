@@ -2,15 +2,13 @@ package vk_prison.ui {
 import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.display.Sprite;
-import flash.display.Stage;
 import flash.text.TextField;
 
 import vk_prison.ui.vk.ListBox;
 
 import vk_prison.data.Question;
 import vk_prison.ui.vk.ListHeader;
-import vk_prison.utils.TimeUtils;
-import vk_prison.vk.Friends;
+import vk_prison.utils.DateUtils;
 
 public class ScreenManager {
     [Embed(source='../../../img/bkg.jpg')]
@@ -45,7 +43,7 @@ public class ScreenManager {
         _sprite = sprite;
     }
 
-    public function showStartScreen(stage:Stage):void {
+    public function showStartScreen(friendsList:Object):void {
         setBackground("final");
 
         _startBtn = new PrisonButton(153, 195, 280, 60, PrisonButton.TEXT_SIZE_GREAT);
@@ -58,17 +56,10 @@ public class ScreenManager {
         _friendsList = new ListBox(576, 44, 220);
         _sprite.addChild(_friendsList);
 
-        var vkFriends:Friends = new Friends(stage);
-        vkFriends.getFriendsList(onFriendsListLoaded);
-    }
-
-    private function onFriendsListLoaded(data:Object):void {
-        for each (var guy:Object in data) {
-            _friendsList.addItem(guy.photo, guy.first_name + " " + guy.last_name);
+        for each (var guy:Object in friendsList) {
+            _friendsList.addItem(guy.uid, guy.first_name + " " + guy.last_name, guy.photo);
         }
     }
-
-
 
     public function showQuestionScreen():void {
         setBackground("common");
@@ -128,11 +119,13 @@ public class ScreenManager {
         _sprite.addChild(_resultTextField);
 
         _resultField = FieldGenerator.createResultField();
-        _resultField.text = score + " " + TimeUtils.getUnit(score);
+        _resultField.text = score + " " + DateUtils.getUnit(score);
         _sprite.addChild(_resultField);
     }
 
     public function clearControls():void {
+        remove(_fListHeader);
+        remove(_friendsList);
         remove(_qNumField);
         remove(_questionField);
         if (_btn != null) {
@@ -143,6 +136,8 @@ public class ScreenManager {
         }
         remove(_finalTextField);
         remove(_resBtn);
+        remove(_resultTextField);
+        remove(_resultField);
     }
 
     private static function remove(child:DisplayObject):void {
@@ -165,7 +160,7 @@ public class ScreenManager {
         return _resBtn;
     }
 
-    private function setBackground(bkgType:String):void {
+    public function setBackground(bkgType:String):void {
         if (_bkg != null) {
             _sprite.removeChild(_bkg);
         }
